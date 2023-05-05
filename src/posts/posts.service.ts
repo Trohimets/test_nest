@@ -4,6 +4,8 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Post } from "./entities/post.entity";
+import { PostDTO } from "./dto/post.dto";
+import { User } from "../users/entities/user.entity";
 
 @Injectable()
 export class PostsService {
@@ -11,33 +13,15 @@ export class PostsService {
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>) {
   }
-
-  create(dto: CreatePostDto) {
-    const post = new Post();
-    post.text = dto.text;
-    post.author = dto.author['firstName'];
-    post.group = dto.group['title'];
-    post.pubDate = dto.pubDate;
-    return this.postsRepository.save(post);
+  public async getAll(): Promise<PostDTO[]> {
+    return await this.repo.find()
+      .then(items => items.map(e => PostDTO.fromEntity(e)));
   }
 
-  findAll(): Promise<Post[]> {
-    return this.postsRepository.find(
-      {relations: ['author', 'group']});
+  public async create(dto: PostDTO, user: User): Promise<PostDTO> {
+    return this.repo.save(dto.toEntity(user))
+      .then(e => PostDTO.fromEntity(e));
   }
 
-  async findOne(id: number): Promise<Post> {
-    return this.postsRepository.findOne({
-      where: { id },
-      relations: ['author', 'group']
-    })
-  }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
-  }
-
-  async remove(id: string): Promise<void> {
-    await this.postsRepository.delete(id);
-  }
 }
