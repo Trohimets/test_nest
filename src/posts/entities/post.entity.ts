@@ -21,11 +21,10 @@ export class Post {
 
   @ManyToOne(() => User, (author) => author.posts)
   @JoinColumn({ name: 'author' })
-  public author: User['firstName']
+  public author: User
 
   @ManyToOne(() => Group, (group) => group.id)
   @JoinColumn({ name: 'group' })
-  @Transform(({ value }) => value.title)
-  public group: Group['title']
+  public group: Group
 
 }
